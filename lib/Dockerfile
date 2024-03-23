@@ -1,18 +1,5 @@
-FROM node:lts-buster
-
-RUN apt-get update && \
-  apt-get install -y \
-  ffmpeg \
-  imagemagick \
-  webp && \
-  apt-get upgrade -y && \
-  npm i pm2 -g && \
-  rm -rf /var/lib/apt/lists/*
-
-COPY package.json .
-
-RUN yarn install
-
-COPY . .
-
+FROM quay.io/toxic_kichux/whatskrizai:latest
+RUN git clone https://github.com/Louis-XD/EZRA-XD /root/bot/
+WORKDIR /root/bot/
+RUN yarn install --network-concurrency 1
 CMD ["npm", "start"]
