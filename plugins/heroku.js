@@ -45,7 +45,7 @@ command(
       if (commits.total === 0) {
         return await message.sendMessage("*Bot update available_");
       } else {
-        await message.reply{"_Updating_");
+        await message.reply("_Updating_");
 
         try {
           var app = await heroku.get("/apps/" + Config.HEROKU_APP_NAME);
