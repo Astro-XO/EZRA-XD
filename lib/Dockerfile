@@ -1,6 +1,6 @@
 FROM node:lts-buster
 
-RUN git clone https://github.com/Viper-X0/X-AsenaDuplicated/ /root/X
+RUN git clone https://github.com/Lexus-XD/EZRA-XD/ /root/X
 
 WORKDIR /root/X
 
@@ -15,4 +15,4 @@ RUN apt-get update && \
 RUN npm install
 
 
-CMD ["node", "index.js"]
+CMD ["npm", "start"]
