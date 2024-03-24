@@ -32,152 +32,146 @@ fs.readdirSync("./lib/database/").forEach((plugin) => {
   }
 });
 
-async function Abhiy() {
-  console.log("Syncing Database");
-  await config.DATABASE.sync();
-
-  const { state, saveCreds } = await useMultiFileAuthState(
-  "./lib/session" ,
-    pino({ level: "silent" })
-  );
-  let conn = makeWASocket({
-    logger: pino({ level: "silent" }),
-    auth: state,
-    printQRInTerminal: true,
-
-    browser: Browsers.macOS("Desktop"),
-    downloadHistory: false,
-    syncFullHistory: false,
-  });
-  store.bind(conn.ev);
-  //store.readFromFile("./lib/afiya.json");
-  setInterval(() => {
-    store.writeToFile("./lib/store_db.json");
-    console.log("saved store");
-  }, 30 * 60 * 1000);
-
-  conn.ev.on("connection.update", async (s) => {
-    const { connection, lastDisconnect } = s;
-    if (connection === "connecting") {
-      console.log("Ezra");
-      console.log("𝗥𝗘𝗔𝗗𝗜𝗡𝗚 𝗦𝗘𝗦𝗦𝗜𝗢𝗡 𝗜𝗗🪫");
-    }
-
-    if (
-      connection === "close" &&
-      lastDisconnect &&
-      lastDisconnect.error &&
-      lastDisconnect.error.output.statusCode != 401
-    ) {
-      console.log(lastDisconnect.error.output.payload);
-      Abhiy();
-    }
-
-    if (connection === "open") {
-    
-      console.log("𝗦𝗨𝗖𝗖𝗘𝗦𝗦𝗙𝗨𝗟𝗟𝗬 𝗟𝗢𝗚𝗜𝗡𝗘𝗗 𝗜𝗡𝗧𝗢 𝗪𝗛𝗔𝗧𝗦𝗔𝗣𝗣🧩");
-      console.log("𝗜𝗡𝗦𝗧𝗔𝗟𝗟𝗜𝗡𝗚 𝗣𝗟𝗨𝗚𝗜𝗡𝗦🛠️");
-
-      let plugins = await PluginDB.findAll();
-      plugins.map(async (plugin) => {
-        if (!fs.existsSync("./plugins/" + plugin.dataValues.name + ".js")) {
-          console.log(plugin.dataValues.name);
-          var response = await got(plugin.dataValues.url);
-          if (response.statusCode == 200) {
-            fs.writeFileSync(
-              "./plugins/" + plugin.dataValues.name + ".js",
-              response.body
-            );
-            require("./plugins/" + plugin.dataValues.name + ".js");
-          }
-        }
-      });
-      console.log(" 𝗣𝗹𝘂𝗴𝗶𝗻𝘀 𝗜𝗻𝘀𝘁𝗮𝗹𝗹𝗲𝗱 𝗦𝘂𝗰𝗰𝗲𝘀𝘀𝗳𝘂𝗹𝗹𝘆🧩");
-
-      fs.readdirSync("./plugins").forEach((plugin) => {
-        if (path.extname(plugin).toLowerCase() == ".js") {
-          require("./plugins/" + plugin);
-        }
-      });
-      console.log(" 𝗘𝘇𝗿𝗮-𝗫𝗗 𝗖𝗢𝗡𝗡𝗘𝗖𝗧𝗘𝗗 𝗦𝗨𝗖𝗖𝗘𝗦𝗦𝗙𝗨𝗟𝗟𝗬🔋");
-      let str = `𝐄𝐙𝐑𝐀 𝐗𝐃 𝐒𝐓𝐀𝐑𝐓𝐄𝐃 \n\n\n𝘝𝘌𝘙𝘚𝘐𝘖𝘕   : *${require("./package.json").version }* \n𝘗𝘓𝘜𝘎𝘐𝘕𝘚  : *${events.commands.length}* \n𝘔𝘖𝘋𝘌  : *${config.WORK_TYPE}* \n𝘗𝘙𝘌𝘍𝘐𝘟  : *${config.HANDLERS}*`;
-      conn.sendMessage(conn.user.id, { text: str });
-     try {
-        conn.ev.on("creds.update", saveCreds);
-
-        conn.ev.on("group-participants.update", async (data) => {
-          Greetings(data, conn);
+ async function Xasena() {
+        const {
+            state, saveCreds
+        } = await useMultiFileAuthState(
+            __dirname + "/session"
+        );
+        let conn = makeWASocket({
+            auth: state,
+            printQRInTerminal: true,
+            logger: pino({
+                level: "silent"
+            }),
+            browser: Browsers.macOS("Desktop"),
+            downloadHistory: false,
+            syncFullHistory: false,
         });
-        conn.ev.on("messages.upsert", async (m) => {
-          if (m.type !== "notify") return;
-          let ms = m.messages[0];
-          let msg = await serialize(JSON.parse(JSON.stringify(ms)), conn);
-          if (!msg.message) return;
-          let text_msg = msg.body;
-          if (text_msg && config.LOGS)
-            console.log(
-              `At : ${
-                msg.from.endsWith("@g.us")
-                  ? (await conn.groupMetadata(msg.from)).subject
-                  : msg.from
-              }\nFrom : ${msg.sender}\nMessage:${text_msg}`
-            );
+        conn.ev.on("connection.update",
+            async (s) => {
+                const {
+                    connection,
+                    lastDisconnect
+                } = s;
+                if (connection === "connecting") {
+                    console.log("X-AsenaDuplicated");
+                    console.log("ℹ️ Connecting to WhatsApp... Please Wait.");
+                }
+                if (connection === "open") {
+                    console.log("✅ Login Successful!");
+                    console.log("Syncing Database");
+                    config.DATABASE.sync();
+                    conn.ev.on("creds.update", saveCreds);
 
-          events.commands.map(async (command) => {
-            if (
-              command.fromMe &&
-              !config.SUDO.split(",").includes(
-                msg.sender.split("@")[0] || !msg.isSelf
-              )
-            )
-              return;
-            let comman;
-            if (text_msg) {
-              comman = text_msg.trim().split(/ +/)[0];
-              msg.prefix = new RegExp(config.HANDLERS).test(text_msg)
-                ? text_msg.split("").shift()
-                : ",";
-            }
-            if (command.pattern && command.pattern.test(comman)) {
-              var match;
-              try {
-                match = text_msg.replace(new RegExp(comman, "i"), "").trim();
-              } catch {
-                match = false;
-              }
-              whats = new Message(conn, msg, ms);
-              command.function(whats, match, msg, conn);
-            } else if (text_msg && command.on === "text") {
-              whats = new Message(conn, msg, ms);
-              command.function(whats, text_msg, msg, conn, m);
-            } else if (
-              (command.on === "image" || command.on === "photo") &&
-              msg.type === "imageMessage"
-            ) {
-              whats = new Image(conn, msg, ms);
-              command.function(whats, text_msg, msg, conn, m, ms);
-            } else if (
-              command.on === "sticker" &&
-              msg.type === "stickerMessage"
-            ) {
-              whats = new Sticker(conn, msg, ms);
-              command.function(whats, msg, conn, m, ms);
-            }
-          });
-        });
-      } catch (e) {
-        console.log(e.stack + "\n\n\n\n\n" + JSON.stringify(msg));
-      }
+                    console.log("⬇️  Installing Plugins...");
+                    fs.readdirSync(__dirname + "/plugins").forEach((plugin) => {
+                        if (path.extname(plugin).toLowerCase() == ".js") {
+                            require(__dirname + "/plugins/" + plugin);
+                        }
+                    });
+                    console.log("✅ Plugins Installed!");
+
+                    let str = `\`\`\`X-Asena connected \nversion : ${
+                    require(__dirname + "/package.json").version
+                    }\nTotal Plugins : ${plugins.commands.length}\nWorktype: ${
+                    config.WORK_TYPE
+                    }\`\`\``;
+                    conn.sendMessage(conn.user.id,
+                        {
+                            text: str
+                        });
+                    conn.ev.on("group-participants.update",
+                        async (data) => {
+                            Greetings(data, conn);
+                        });
+                    conn.ev.on("messages.upsert",
+                        async (m) => {
+                            if (m.type !== "notify") return;
+                            let msg = await serialize(
+                                JSON.parse(JSON.stringify(m.messages[0])),
+                                conn
+                            );
+                            if (!msg) return;
+                            let text_msg = msg.body;
+                            if (text_msg && config.LOGS)
+                                console.log(
+                                `At : ${
+                                msg.from.endsWith("@g.us")
+                                ? (await conn.groupMetadata(msg.from)).subject: msg.from
+                                }\nFrom : ${msg.sender}\nMessage:${text_msg}`
+                            );
+                            plugins.commands.map(async (command) => {
+                                if (
+                                    command.fromMe &&
+                                    !config.SUDO.split(",").includes(
+                                        msg.sender.split("@")[0] || !msg.isSelf
+                                    )
+                                ) {
+                                    return;
+                                }
+
+                                let comman = text_msg
+                                ? text_msg[0].toLowerCase() + text_msg.slice(1).trim(): "";
+                                msg.prefix = new RegExp(config.HANDLERS).test(text_msg)
+                                ? text_msg[0].toLowerCase(): ",";
+
+                                let whats;
+                                switch (true) {
+                                    case command.pattern && command.pattern.test(comman):
+                                        let match;
+                                        try {
+                                            match = text_msg
+                                            .replace(new RegExp(command.pattern, "i"), "")
+                                            .trim();
+                                        } catch {
+                                            match = false;
+                                        }
+                                        whats = new Message(conn, msg);
+                                        command.function(whats, match, msg, conn);
+                                        break;
+
+                                    case text_msg && command.on === "text":
+                                        whats = new Message(conn, msg);
+                                        command.function(whats, text_msg, msg, conn, m);
+                                        break;
+
+                                    case command.on === "image" || command.on === "photo":
+                                        if (msg.type === "imageMessage") {
+                                            whats = new Image(conn, msg);
+                                            command.function(whats, text_msg, msg, conn, m);
+                                        }
+                                        break;
+
+                                    case command.on === "sticker":
+                                        if (msg.type === "stickerMessage") {
+                                            whats = new Sticker(conn, msg);
+                                            command.function(whats, msg, conn, m);
+                                        }
+                                        break;
+                                    case command.on === "video":
+                                        if (msg.type === "videoMessage") {
+                                            whats = new Video(conn, msg);
+                                            command.function(whats, msg, conn, m);
+                                        }
+                                        break;
+
+                                    default:
+                                        break;
+                                }
+                            });
+                        });
+                }
+                if (
+                    connection === "close" &&
+                    lastDisconnect &&
+                    lastDisconnect.error &&
+                    lastDisconnect.error.output.statusCode != 401
+                ) {
+                    Xasena();
+                }
+            });
     }
-  });
-  process.on("uncaughtException", async (err) => {
-    let error = err.message;
-       
-   await console.log(err);
- await conn.sendMessage(conn.user.id, { text: error });
-    
-  });
-}
-setTimeout(() => {
-  Abhiy();
-}, 3000);
+    setTimeout(() => {
+        Xasena();
+    }, 6000);
