@@ -1,5 +1,18 @@
-FROM quay.io/toxic_kichux/whatskrizai:latest
-RUN git clone https://github.com/Louis-XD/EZRA-XD /root/bot/
-WORKDIR /root/bot/
-RUN yarn install --network-concurrency 1
-CMD ["npm", "start"]
+FROM node:lts-buster
+
+RUN git clone https://github.com/Viper-X0/X-AsenaDuplicated/ /root/X
+
+WORKDIR /root/X
+
+RUN apt-get update && \
+  apt-get install -y \
+  ffmpeg \
+  imagemagick \
+  webp && \
+  apt-get upgrade -y && \
+  rm -rf /var/lib/apt/lists/*
+
+RUN npm install
+
+
+CMD ["node", "index.js"]
